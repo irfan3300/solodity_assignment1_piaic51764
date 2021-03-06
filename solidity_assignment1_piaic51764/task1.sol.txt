@@ -1,0 +1,76 @@
+pragma solidity  <=0.8.0;
+
+contract studentReg{
+    
+    address payable private myAddress = 0xcD8e1E6b98d21d6A8aa9D140BF08d9D1D023ddFd;
+    uint numberOfStudents = 0;
+    
+   
+    enum Gender {male, female} // enum for male/female 
+    
+    struct Student {                    // struct for student 
+       uint rollNumber;
+        string studentName;
+        uint age;
+        Gender[] gender;
+        bool bsDegree;
+       
+    }
+    
+    mapping (address => Student) students; // mapping of student structure to address(ether) of student and put in array students as a structure
+    address[] public studentAccts;   // studentAccts array
+    
+    function EnrollStudent(          // this function gets input and stores the input in students array with address as key
+        address _address,
+        uint _rollNumber,
+        string memory _studentName,
+        uint _age,
+        Gender _gender,
+        bool _degree) public payable {
+            
+        Student storage student = students[_address];
+        student.rollNumber = _rollNumber;
+        student.studentName = _studentName;
+        student.age = _age;
+        student.gender.push(_gender);
+        
+        student.bsDegree = _degree;
+        
+        require(_degree == true, "You must have BS degree");
+        require(msg.value == 2 ether, "You must pay 2 Ether for Registration");
+        myAddress.transfer(msg.value);
+        numberOfStudents++;
+         
+    }
+    
+      function getStudents() view public returns(address[] memory) {       // this function gets all addresses of enrolled students
+        return studentAccts;
+    }
+    
+    
+    function getSingleStudent(address _address) view public returns (        // this function fetch record of single student with address key
+       uint, string memory, uint, Gender[] memory, bool)
+        {
+        return (students[_address].rollNumber,
+                students[_address].studentName,
+                students[_address].age,
+                students[_address].gender,
+                students[_address].bsDegree);
+    }
+    
+    function countStudents() view public returns (uint) {                 // provides the number of enrolled students
+        return numberOfStudents;
+    }
+    
+    function setAddress(address payable add) public {                     // this function sets the address for recieving fees from students 
+        myAddress = add;
+    }
+    
+    function getBalance() public view returns(uint){                      // this function provides the current balance of tutor's address
+        return myAddress.balance;
+    }
+    
+    function getAddress() public view returns(address){                   // this function shows the address of tutor in which fee is deposited
+        return myAddress;
+    }   
+}
